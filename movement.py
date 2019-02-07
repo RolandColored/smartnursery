@@ -55,7 +55,7 @@ def switch_lamp(code):
 def movement_callback(_):
     global last_movement
 
-    print('Mobement detected')
+    print('Movement detected')
     last_movement = datetime.now()
     play_music()
     switch_lamp(enable_code)
@@ -68,6 +68,7 @@ if __name__ == '__main__':
         print('Started')
 
         while True:
+            # timeout without movement
             if (datetime.now() - last_movement).seconds > 60:
                 stop_music()
                 switch_lamp(disable_code)
