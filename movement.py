@@ -16,7 +16,7 @@ last_movement = datetime.now()
 
 # music device
 musiccast_endpoint = 'http://Kinderzimmer/YamahaExtendedControl/v1/main/'
-playing_music = False
+room_active = False
 
 # power switch
 enable_code = 5506385
@@ -28,23 +28,15 @@ rfdevice.enable_tx()
 
 
 def play_music():
-    global playing_music
-
-    if not playing_music:
-        print('Playing music')
-        assert requests.get(musiccast_endpoint + 'setPower?power=on').status_code == 200
-        assert requests.get(musiccast_endpoint + 'setInput?input=net_radio').status_code == 200
-        assert requests.get(musiccast_endpoint + 'setPlayback?playback=play').status_code == 200
-        playing_music = True
+    print('Playing music')
+    assert requests.get(musiccast_endpoint + 'setPower?power=on').status_code == 200
+    assert requests.get(musiccast_endpoint + 'setInput?input=net_radio').status_code == 200
+    assert requests.get(musiccast_endpoint + 'setPlayback?playback=play').status_code == 200
 
 
 def stop_music():
-    global playing_music
-
-    if playing_music:
-        print('Stopping music')
-        assert requests.get(musiccast_endpoint + 'setPower?power=standby').status_code == 200
-        playing_music = False
+    print('Stopping music')
+    assert requests.get(musiccast_endpoint + 'setPower?power=standby').status_code == 200
 
 
 def switch_lamp(code):
@@ -53,12 +45,14 @@ def switch_lamp(code):
 
 
 def movement_callback(_):
-    global last_movement
+    global last_movement, room_active
 
     print('Movement detected')
     last_movement = datetime.now()
-    play_music()
-    switch_lamp(enable_code)
+    if not room_active:
+        play_music()
+        switch_lamp(enable_code)
+        room_active = True
 
 
 if __name__ == '__main__':
@@ -69,11 +63,12 @@ if __name__ == '__main__':
 
         while True:
             # timeout without movement
-            if (datetime.now() - last_movement).seconds > 60:
+            if room_active and (datetime.now() - last_movement).seconds > 60:
                 stop_music()
                 switch_lamp(disable_code)
+                room_active = False
 
-            time.sleep(0.1)
+            time.sleep(0.2)
 
     finally:
         print('Cleaning up')
