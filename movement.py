@@ -49,7 +49,7 @@ def movement_callback(_):
 
     print('Movement detected')
     last_movement = datetime.now()
-    if not room_active:
+    if not room_active and 0 <= last_movement.hour <= 6:
         play_music()
         switch_lamp(enable_code)
         room_active = True
