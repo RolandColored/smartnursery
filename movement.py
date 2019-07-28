@@ -49,7 +49,7 @@ def movement_callback(_):
 
     print('Movement detected')
     last_movement = datetime.now()
-    if not room_active and 0 <= last_movement.hour <= 6:
+    if not room_active and (0 <= last_movement.hour <= 5) or last_movement.hour == 23:
         play_music()
         switch_lamp(enable_code)
         room_active = True
@@ -68,9 +68,10 @@ if __name__ == '__main__':
                 switch_lamp(disable_code)
                 room_active = False
 
-            time.sleep(0.2)
+            time.sleep(0.5)
 
     finally:
         print('Cleaning up')
+        switch_lamp(disable_code)
         stop_music()
         GPIO.cleanup()
